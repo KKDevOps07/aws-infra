@@ -1,5 +1,5 @@
 variable "aws_region" {
-  default = "us-east-1"
+  default = "eu-west-1"
 }
 
 variable "vpc_cidr" {
@@ -11,11 +11,15 @@ variable "vpc_name" {
 }
 
 variable "availability_zone" {
-  default = "us-east-1a"
+  default = "eu-west-1a" # Replace with your desired availability zone
 }
 
 variable "public_subnet_name" {
   default = "public-subnet"
+}
+
+variable "private_subnet_name" {
+  default = "private-subnet"
 }
 
 variable "public_subnet_cidr" {
@@ -28,9 +32,6 @@ variable "private_subnet_cidr" {
   description = "CIDR block for the public subnet"
   type        = string
   default     = "192.168.2.0/24"
-}
-variable "private_subnet_name" {
-  default = "private-subnet"
 }
 
 variable "igw_name" {
