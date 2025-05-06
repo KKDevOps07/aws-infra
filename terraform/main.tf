@@ -1,4 +1,6 @@
-# VPC
+# ==========================
+# VPC Configuration
+# ==========================
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
@@ -8,10 +10,13 @@ resource "aws_vpc" "main" {
   }
 }
 
-# Subnets
+# ==========================
+# Subnet Configuration
+# ==========================
+# Public Subnet (AZ1)
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "192.168.0.0/24"
+  cidr_block              = var.public_subnet_cidr
   map_public_ip_on_launch = true
   availability_zone       = var.availability_zone
   tags = {
@@ -19,9 +24,10 @@ resource "aws_subnet" "public" {
   }
 }
 
+# Private Subnet (AZ1)
 resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "192.168.1.0/24"
+  cidr_block        = var.private_subnet_cidr
   availability_zone = var.availability_zone
   tags = {
     Name = var.private_subnet_name
@@ -30,9 +36,9 @@ resource "aws_subnet" "private" {
 
 resource "aws_subnet" "public_az2" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "192.168.2.0/24"
+  cidr_block              = var.public_subnet_cidr_az2
   map_public_ip_on_launch = true
-  availability_zone       = "us-east-1b"
+  availability_zone       = var.availability_zone_az2
   tags = {
     Name = var.public_subnet_name_az2
   }
@@ -40,14 +46,16 @@ resource "aws_subnet" "public_az2" {
 
 resource "aws_subnet" "private_az2" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "192.168.3.0/24"
-  availability_zone = "us-east-1b"
+  cidr_block        = var.private_subnet_cidr_az2
+  availability_zone = var.availability_zone_az2
   tags = {
     Name = var.private_subnet_name_az2
   }
 }
 
-# Internet Gateway
+# ==========================
+# Internet Gateway and NAT
+# ==========================
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
   tags = {
@@ -55,6 +63,19 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
+resource "aws_eip" "nat" {}
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public.id
+  tags = {
+    Name = var.nat_gateway_name
+  }
+}
+
+# ==========================
+# Route Tables
+# ==========================
 # Route Table for Public Subnet
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
@@ -70,17 +91,6 @@ resource "aws_route_table" "public" {
 resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
-}
-
-# NAT Gateway
-resource "aws_eip" "nat" {}
-
-resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public.id
-  tags = {
-    Name = var.nat_gateway_name
-  }
 }
 
 # Route Table for Private Subnet
@@ -100,11 +110,13 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
-# Security Group for Kubernetes
+# ==========================
+# Security Groups
+# ==========================
+# Security Group for Kubernetes (Master and Slave Nodes)
 resource "aws_security_group" "kubernetes" {
   vpc_id = aws_vpc.main.id
 
-  # Allow SSH access from the bastion host
   ingress {
     from_port   = 22
     to_port     = 22
@@ -112,7 +124,6 @@ resource "aws_security_group" "kubernetes" {
     cidr_blocks = ["192.168.0.0/24"]
   }
 
-  # Allow Kubernetes API access
   ingress {
     from_port   = 6443
     to_port     = 6443
@@ -120,7 +131,6 @@ resource "aws_security_group" "kubernetes" {
     cidr_blocks = [var.trusted_ip_range]
   }
 
-  # Allow all outbound traffic
   egress {
     from_port   = 0
     to_port     = 0
@@ -137,7 +147,6 @@ resource "aws_security_group" "kubernetes" {
 resource "aws_security_group" "bastion" {
   vpc_id = aws_vpc.main.id
 
-  # Allow SSH access from anywhere (adjust CIDR block as needed for security)
   ingress {
     from_port   = 22
     to_port     = 22
@@ -145,7 +154,6 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = ["0.0.0.0/0"] # Replace with a specific IP range for better security
   }
 
-  # Allow all outbound traffic
   egress {
     from_port   = 0
     to_port     = 0
@@ -158,7 +166,9 @@ resource "aws_security_group" "bastion" {
   }
 }
 
+# ==========================
 # RDS MySQL Database
+# ==========================
 resource "aws_db_instance" "mysql" {
   allocated_storage      = var.rds_allocated_storage
   engine                 = "mysql"
@@ -181,13 +191,31 @@ resource "aws_db_instance" "mysql" {
 
 resource "aws_db_subnet_group" "main" {
   name       = var.db_subnet_group_name
-  subnet_ids = [aws_subnet.private.id, aws_subnet.private_az2.id]
+  subnet_ids = [aws_subnet.private_az2.id]
   tags = {
     Name = var.db_subnet_group_name
   }
 }
 
+# ==========================
 # EC2 Instances
+# ==========================
+# Bastion Host (Access Point for Developers/DevOps)
+resource "aws_instance" "bastion" {
+  ami                    = var.ami_id
+  instance_type          = "t2.micro"
+  key_name               = "kk"
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.bastion.id]
+  instance_market_options {
+    market_type = "spot"
+  }
+  tags = {
+    Name = "bastion-host"
+  }
+}
+
+# Master Node (Accessed via Bastion Host by Developers/DevOps)
 resource "aws_instance" "master" {
   ami                    = var.ami_id
   instance_type          = "t2.medium"
@@ -244,21 +272,22 @@ kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/we
 EOF
 }
 
+# Slave Nodes (Accessed by Users via Kubernetes API)
 resource "aws_instance" "slave" {
-  count                  = 2
+  count                  = 3
   ami                    = var.ami_id
   instance_type          = "t2.medium"
   key_name               = "kk"
-  subnet_id              = aws_subnet.private.id
+  subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.kubernetes.id]
   tags = {
     Name = "slave-node-${count.index + 1}"
   }
 
-  user_data = <<-EOF
+  user_data = <<EOF
 #!/bin/bash
 set -e
-exec > >(tee /var/log/user_data.log|logger -t user_data -s 2>/dev/console) 2>&1
+exec > >(tee /var/log/user_data.log | logger -t user_data -s 2>/dev/console) 2>&1
 
 # Update and install dependencies
 sudo apt-get update -y
@@ -294,17 +323,13 @@ eval $JOIN_COMMAND
 EOF
 }
 
-# Bastion Host
-resource "aws_instance" "bastion" {
-  ami                    = var.ami_id
-  instance_type          = "t2.micro"
-  key_name               = "kk"
-  subnet_id              = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.bastion.id]
-  instance_market_options {
-    market_type = "spot"
-  }
-  tags = {
-    Name = "bastion-host"
-  }
-}
+# ==========================
+# Access Flow Explanation
+# ==========================
+# 1. Users:
+#    - Access the Slave Nodes via the Kubernetes API.
+#    - Slave Nodes are in the public subnet.
+
+# 2. Developers/DevOps:
+#    - Access the Bastion Host via SSH.
+#    - From the Bastion Host, access the Master Node in the private subnet.

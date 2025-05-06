@@ -3,7 +3,9 @@ variable "aws_region" {
 }
 
 variable "vpc_cidr" {
-  default = "192.168.0.0/16"
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "192.168.0.0/24"
 }
 
 variable "vpc_name" {
@@ -11,7 +13,13 @@ variable "vpc_name" {
 }
 
 variable "availability_zone" {
-  default = "eu-west-1a" # Replace with your desired availability zone
+  description = "Primary availability zone"
+  default     = "eu-west-1a"
+}
+
+variable "availability_zone_az2" {
+  description = "Secondary availability zone"
+  default     = "eu-west-1b"
 }
 
 variable "public_subnet_name" {
@@ -29,9 +37,29 @@ variable "public_subnet_cidr" {
 }
 
 variable "private_subnet_cidr" {
-  description = "CIDR block for the public subnet"
+  description = "CIDR block for the private subnet"
   type        = string
   default     = "192.168.2.0/24"
+}
+
+variable "public_subnet_cidr_az2" {
+  description = "CIDR block for the public subnet in the second availability zone"
+  type        = string
+  default     = "192.168.3.0/24"
+}
+
+variable "private_subnet_cidr_az2" {
+  description = "CIDR block for the private subnet in the second availability zone"
+  type        = string
+  default     = "192.168.4.0/24"
+}
+
+variable "public_subnet_name_az2" {
+  default = "public-subnet-az2"
+}
+
+variable "private_subnet_name_az2" {
+  default = "private-subnet-az2"
 }
 
 variable "igw_name" {
@@ -120,32 +148,4 @@ variable "private_key_path" {
   description = "Path to the private key file"
   type        = string
   default     = "kk.pem"
-}
-
-variable "public_subnet_cidr_az2" {
-  description = "CIDR block for the public subnet in the second availability zone"
-  type        = string
-  default     = "10.0.3.0/24" # Adjusted CIDR block
-}
-
-variable "private_subnet_cidr_az2" {
-  description = "CIDR block for the private subnet in the second availability zone"
-  type        = string
-  default     = "10.0.4.0/24" # Adjusted CIDR block
-}
-
-# Add your variable declarations here
-
-variable "public_subnet_name_az2" {
-  description = "Name of the public subnet in availability zone 2"
-  type        = string
-  default     = "public-subnet-az2"
-}
-
-# Add your variable declarations here
-
-variable "private_subnet_name_az2" {
-  description = "Name of the private subnet in availability zone 2"
-  type        = string
-  default     = "private-subnet-az2" # Replace with your desired default value
 }
