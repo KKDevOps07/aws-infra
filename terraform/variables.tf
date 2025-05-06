@@ -109,13 +109,11 @@ variable "alb_name" {
 variable "aws_access_key" {
   description = "AWS Access Key"
   type        = string
-  default     = env("AWS_ACCESS_KEY_ID") # Use the environment variable
 }
 
 variable "aws_secret_key" {
   description = "AWS Secret Access Key"
   type        = string
-  default     = env("AWS_SECRET_ACCESS_KEY") # Use the environment variable
 }
 
 variable "private_key_path" {
