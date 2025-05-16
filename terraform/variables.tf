@@ -1,11 +1,27 @@
 variable "aws_region" {
-  default = "eu-west-1"
+  type = string
+}
+
+variable "aws_access_key" {
+  description = "AWS Access Key"
+  type        = string
+}
+
+variable "aws_secret_key" {
+  description = "AWS Secret Access Key"
+  type        = string
+}
+
+variable "private_key_path" {
+  description = "Path to the private key file"
+  type        = string
+  default     = "kk1.pem"
 }
 
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
-  default     = "192.168.0.0/24"
+  default     = "192.168.0.0/16"
 }
 
 variable "vpc_name" {
@@ -14,12 +30,12 @@ variable "vpc_name" {
 
 variable "availability_zone" {
   description = "Primary availability zone"
-  default     = "eu-west-1a"
+  default     = "us-west-2a"
 }
 
 variable "availability_zone_az2" {
   description = "Secondary availability zone"
-  default     = "eu-west-1b"
+  default     = "us-west-2b"
 }
 
 variable "public_subnet_name" {
@@ -86,44 +102,44 @@ variable "kubernetes_sg_name" {
   default = "kubernetes-sg"
 }
 
-variable "rds_allocated_storage" {
-  default = 20
-}
+# variable "rds_allocated_storage" {
+#   default = 20
+# }
 
-variable "rds_engine_version" {
-  default = "8.0"
-}
+# variable "rds_engine_version" {
+#   default = "8.0"
+# }
 
-variable "rds_instance_class" {
-  default = "db.t2.medium"
-}
+# variable "rds_instance_class" {
+#   default = "db.t2.medium"
+# }
 
-variable "rds_db_name" {
-  default = "mydb"
-}
+# variable "rds_db_name" {
+#   default = "mydb"
+# }
 
-variable "rds_username" {
-  default = "admin"
-}
+# variable "rds_username" {
+#   default = "admin"
+# }
 
-variable "rds_password" {
-  default = "password123"
-}
+# variable "rds_password" {
+#   default = "password123"
+# }
 
-variable "rds_name" {
-  default = "mysql-db"
-}
+# variable "rds_name" {
+#   default = "mysql-db"
+# }
 
 variable "db_subnet_group_name" {
   default = "main-db-subnet-group"
 }
 
 variable "ami_id" {
-  default = "ami-0d5eff06f840b45e9" # Replace with the correct Ubuntu AMI for your region
+  default = "ami-075686beab831bb7f" # Replace with the correct Ubuntu AMI for your region
 }
 
 variable "instance_type" {
-  default = "t2.medium"
+  default = "t2.medium"                         
 }
 
 variable "nlb_name" {
@@ -132,20 +148,4 @@ variable "nlb_name" {
 
 variable "alb_name" {
   default = "application-load-balancer"
-}
-
-variable "aws_access_key" {
-  description = "AWS Access Key"
-  type        = string
-}
-
-variable "aws_secret_key" {
-  description = "AWS Secret Access Key"
-  type        = string
-}
-
-variable "private_key_path" {
-  description = "Path to the private key file"
-  type        = string
-  default     = "kk.pem"
 }
