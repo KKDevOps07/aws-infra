@@ -24,22 +24,22 @@ pipeline {
                         sudo apt-get update && sudo apt-get install -y unzip
                     fi
                 '''
-    }
-}
+            }
+        }
 
         stage('Install Terraform') {
             steps {
                 sh '''
-                   if ! command -v terraform >/dev/null 2>&1; then
-                       echo "Terraform not found. Installing..."
-                       curl -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/${TERRAFORM_ZIP}
-                       unzip ${TERRAFORM_ZIP}
-                       sudo mv terraform /usr/local/bin/
-                       rm ${TERRAFORM_ZIP}
-                   else
-                       echo "Terraform is already installed."
-                   fi
-                   terraform version
+                    if ! command -v terraform >/dev/null 2>&1; then
+                        echo "Terraform not found. Installing..."
+                        curl -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/${TERRAFORM_ZIP}
+                        unzip -o ${TERRAFORM_ZIP}
+                        sudo mv terraform /usr/local/bin/
+                        rm -f ${TERRAFORM_ZIP}
+                    else
+                        echo "✅ Terraform is already installed."
+                    fi
+                    terraform version
                 '''
             }
         }
@@ -56,8 +56,10 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 dir('terraform') {
-                    withCredentials([string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
-                                     string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    withCredentials([
+                        string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
+                        string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                    ]) {
                         sh 'terraform init'
                     }
                 }
@@ -67,8 +69,10 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 dir('terraform') {
-                    withCredentials([string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
-                                     string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    withCredentials([
+                        string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
+                        string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                    ]) {
                         sh 'terraform plan'
                     }
                 }
@@ -78,8 +82,10 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 dir('terraform') {
-                    withCredentials([string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
-                                     string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    withCredentials([
+                        string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
+                        string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                    ]) {
                         sh 'terraform apply -auto-approve'
                     }
                 }
