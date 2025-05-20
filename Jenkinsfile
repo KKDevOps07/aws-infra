@@ -13,11 +13,19 @@ pipeline {
                 git url: 'https://github.com/KKDevOps07/aws-infra.git'
             }
         }
-        stage ('Check unzip') {
+
+        stage('Check unzip') {
             steps {
-                sh 'which unzip || sudo apt-get update && sudo apt-get install -y unzip'
-            }
-        }
+                sh '''
+                    if command -v unzip > /dev/null; then
+                        echo "✅ unzip is already installed."
+                    else
+                        echo "❌ unzip is not installed. Trying to install..."
+                        sudo apt-get update && sudo apt-get install -y unzip
+                    fi
+                '''
+    }
+}
 
         stage('Install Terraform') {
             steps {
