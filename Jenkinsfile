@@ -5,6 +5,7 @@ pipeline {
         TERRAFORM_VERSION = "1.6.6"
         TERRAFORM_ZIP = "terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
         AWS_REGION = "us-west-2"  // Set your AWS region here as plain text
+        PATH = "${env.HOME}/bin:${env.PATH}"  // Add $HOME/bin to PATH so terraform is found
     }
 
     stages {
@@ -34,7 +35,8 @@ pipeline {
                         echo "Terraform not found. Installing..."
                         curl -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/${TERRAFORM_ZIP}
                         unzip ${TERRAFORM_ZIP} -d terraform_bin
-                        sudo mv terraform_bin/terraform /usr/local/bin/
+                        mkdir -p $HOME/bin
+                        mv terraform_bin/terraform $HOME/bin/
                         rm -rf terraform_bin ${TERRAFORM_ZIP}
                     else
                         echo "Terraform is already installed."
