@@ -13,7 +13,7 @@ pipeline {
                 git url: 'https://github.com/KKDevOps07/aws-infra.git'
             }
         }
-        stages ('Check unzip') {
+        stage ('Check unzip') {
             steps {
                 sh 'which unzip || sudo apt-get update && sudo apt-get install -y unzip'
             }
