@@ -4,13 +4,18 @@ pipeline {
     environment {
         TERRAFORM_VERSION = "1.6.6"
         TERRAFORM_ZIP = "terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
-        AWS_REGION = "us-west-2"  // Set your AWS region here as plain text
+        AWS_REGION = "us-"  // Set your AWS region here as plain text
     }
 
     stages {
         stage('Checkout Code') {
             steps {
                 git url: 'https://github.com/KKDevOps07/aws-infra.git'
+            }
+        }
+        stages ('Check unzip') {
+            steps {
+                sh 'which unzip || sudo apt-get update && sudo apt-get install -y unzip'
             }
         }
 
