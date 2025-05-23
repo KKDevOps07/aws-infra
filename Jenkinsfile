@@ -21,7 +21,7 @@ pipeline {
                     if command -v unzip > /dev/null; then
                         echo "✅ unzip is already installed."
                     else
-                        echo "❌ unzip is not installed. Trying to install..."
+                        echo "❌ unzip is not installed. Installing..."
                         sudo apt-get update && sudo apt-get install -y unzip
                     fi
                 '''
@@ -52,8 +52,6 @@ pipeline {
                 dir('terraform') {
                     withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                         sh '''
-                            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
                             terraform init
                         '''
                     }
@@ -74,11 +72,7 @@ pipeline {
             steps {
                 dir('terraform') {
                     withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        sh '''
-                            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-                            terraform plan
-                        '''
+                        sh 'terraform plan'
                     }
                 }
             }
@@ -88,11 +82,7 @@ pipeline {
             steps {
                 dir('terraform') {
                     withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        sh '''
-                            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-                            terraform apply -auto-approve
-                        '''
+                        sh 'terraform apply -auto-approve'
                     }
                 }
             }
