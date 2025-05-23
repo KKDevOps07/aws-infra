@@ -47,15 +47,6 @@ pipeline {
             }
         }
 
-        stage('Terraform Format & Validate') {
-            steps {
-                dir('terraform') {
-                    sh 'terraform fmt'         // Auto-format to avoid pipeline failure
-                    sh 'terraform validate'
-                }
-            }
-        }
-
         stage('Terraform Init') {
             steps {
                 dir('terraform') {
@@ -65,6 +56,15 @@ pipeline {
                     ]) {
                         sh 'terraform init'
                     }
+                }
+            }
+        }
+
+        stage('Terraform Format & Validate') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform fmt'         // Auto-format to avoid pipeline failure
+                    sh 'terraform validate'
                 }
             }
         }
