@@ -56,6 +56,7 @@ pipeline {
                         sh '''
                             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
                             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                            export AWS_REGION=${AWS_REGION}
                             terraform init
                         '''
                     }
@@ -81,7 +82,8 @@ pipeline {
                         sh '''
                             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
                             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-                            terraform plan
+                            export AWS_REGION=${AWS_REGION}
+                            terraform plan -auto-approve
                         '''
                     }
                 }
@@ -97,6 +99,7 @@ pipeline {
                         sh '''
                             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
                             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                            export AWS_REGION=${AWS_REGION}
                             terraform apply -auto-approve
                         '''
                     }
